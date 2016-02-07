@@ -46,7 +46,6 @@ import com.qualcomm.vuforia.WordList;
 import com.qualcomm.vuforia.samples.SampleApplication.SampleApplicationControl;
 import com.qualcomm.vuforia.samples.SampleApplication.SampleApplicationException;
 import com.qualcomm.vuforia.samples.SampleApplication.SampleApplicationSession;
-import com.qualcomm.vuforia.samples.SampleApplication.utils.LoadingDialogHandler;
 import com.qualcomm.vuforia.samples.SampleApplication.utils.SampleApplicationGLView;
 import com.qualcomm.vuforia.samples.SampleApplication.utils.SampleUtils;
 import com.qualcomm.vuforia.samples.VuforiaSamples.R;
@@ -75,8 +74,6 @@ public class TextReco extends Activity implements SampleApplicationControl
     
     private RelativeLayout mUILayout;
     
-    private LoadingDialogHandler loadingDialogHandler = new LoadingDialogHandler(
-        this);
     private boolean mIsTablet = false;
     
     private boolean mIsVuforiaStarted = false;
@@ -256,15 +253,7 @@ public class TextReco extends Activity implements SampleApplicationControl
         
         mUILayout.setVisibility(View.VISIBLE);
         mUILayout.setBackgroundColor(Color.BLACK);
-        
-        // Gets a reference to the loading dialog
-        loadingDialogHandler.mLoadingDialogContainer = mUILayout
-            .findViewById(R.id.loading_indicator);
-        
-        // Shows the loading indicator at start
-        loadingDialogHandler
-            .sendEmptyMessage(LoadingDialogHandler.SHOW_LOADING_DIALOG);
-        
+
         // Adds the inflated layout to the view
         addContentView(mUILayout, new LayoutParams(LayoutParams.MATCH_PARENT,
             LayoutParams.MATCH_PARENT));
@@ -613,9 +602,6 @@ public class TextReco extends Activity implements SampleApplicationControl
             addContentView(mGlView, new LayoutParams(LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT));
             
-            // Hides the Loading Dialog
-            loadingDialogHandler
-                .sendEmptyMessage(LoadingDialogHandler.HIDE_LOADING_DIALOG);
             showLoupe(true);
             
             // Sets the UILayout to be drawn in front of the camera
