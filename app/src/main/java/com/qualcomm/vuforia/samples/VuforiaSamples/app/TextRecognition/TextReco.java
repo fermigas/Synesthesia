@@ -9,16 +9,24 @@ package com.qualcomm.vuforia.samples.VuforiaSamples.app.TextRecognition;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
 import android.text.Layout.Alignment;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 import android.text.StaticLayout;
 import android.text.TextPaint;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.StyleSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -52,6 +60,7 @@ import com.qualcomm.vuforia.samples.VuforiaSamples.R;
 import com.qualcomm.vuforia.samples.VuforiaSamples.app.TextRecognition.TextRecoRenderer.WordDesc;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 
@@ -84,8 +93,9 @@ public class TextReco extends Activity implements SampleApplicationControl
     private AlertDialog mErrorDialog;
     
     boolean mIsDroidDevice = false;
-    
-    
+    private int[][] mColorTable;
+
+
     // Called when the activity first starts or the user navigates back to an
     // activity.
     @Override
@@ -95,7 +105,9 @@ public class TextReco extends Activity implements SampleApplicationControl
         super.onCreate(savedInstanceState);
         
         vuforiaAppSession = new SampleApplicationSession(this);
-        
+
+        generateSynesthesiaColorMap();
+
         startLoadingAnimation();
         
         vuforiaAppSession
@@ -400,15 +412,16 @@ public class TextReco extends Activity implements SampleApplicationControl
                             break;
                         }
                         tv = new TextView(TextReco.this);
-                        tv.setText(word.text);
+                        // tv.setText(word.text);
                         RelativeLayout.LayoutParams txtParams = new RelativeLayout.LayoutParams(
-                            LayoutParams.MATCH_PARENT,
+                            LayoutParams.WRAP_CONTENT,
                             LayoutParams.WRAP_CONTENT);
-                        
-                        if (previousView != null)
-                            txtParams.addRule(RelativeLayout.BELOW,
+//
+                        if (previousView != null) {
+                            txtParams.addRule(RelativeLayout.RIGHT_OF,
                                 previousView.getId());
-                        
+                        }
+
                         txtParams.setMargins(0, (count == 0) ? WORDLIST_MARGIN
                             : 0, 0, (count == (nbWords - 1)) ? WORDLIST_MARGIN
                             : 0);
@@ -416,8 +429,15 @@ public class TextReco extends Activity implements SampleApplicationControl
                         tv.setGravity(Gravity.CENTER_VERTICAL
                             | Gravity.CENTER_HORIZONTAL);
                         tv.setTextSize(textInfo[0]);
-                        tv.setTextColor(Color.WHITE);
+                        // tv.setTextColor(Color.WHITE);
+                        tv.setBackgroundColor(Color.WHITE);
                         tv.setHeight(textInfo[1]);
+
+                        SpannableStringBuilder ss = convertToSynesthesia(word.text);
+
+                        // tv.setText(ss.toString());
+                        tv.append(ss);
+                        tv.append(" ");
                         tv.setId(count + 100);
                         
                         wordListLayout.addView(tv);
@@ -427,8 +447,73 @@ public class TextReco extends Activity implements SampleApplicationControl
             }
         });
     }
-    
-    
+
+
+    private SpannableStringBuilder convertToSynesthesia(String string){
+
+        SpannableStringBuilder ss = new SpannableStringBuilder(string);
+
+        for(int i=0; i<string.length(); i++ ){
+            // Set Character Color
+            ss.setSpan( convertLetterToColor(string.substring(i, i+1)),
+                        i, i+1,  Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ss.setSpan(new StyleSpan(Typeface.BOLD_ITALIC),
+                        i, i+1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        //  tv.setText("Try Me  ");
+//                        ss.setSpan(new RelativeSizeSpan(1.5f), 0, 2, 0);
+//                        ss.setSpan(new StyleSpan(Typeface.BOLD), 0, 2, 0);
+
+        return ss;
+    }
+
+
+    private ForegroundColorSpan convertLetterToColor(String letter){
+
+        int color = 0;
+
+        int n = -97 + (int) letter.toLowerCase().charAt(0);
+
+
+        if (n >= 0 &&n < 26 )
+            color = mColorTable[n][1];
+        else    color = Color.BLACK;
+
+        return new ForegroundColorSpan(color);
+    }
+
+    private void generateSynesthesiaColorMap() {
+        mColorTable = new int[][] {
+                { 1,   Color.rgb(207, 100, 35 )  },
+                { 2,   Color.rgb(22, 77, 62  )  },
+                { 3,   Color.rgb(49, 74, 98 )  },
+                { 4,   Color.rgb(41, 94, 100 )  },
+                { 5,   Color.rgb(88, 51, 84 )  },
+                { 6,   Color.rgb(88, 76, 55  )  },
+                { 7,   Color.rgb(0, 0, 100  )  },
+                { 8,   Color.rgb(85, 38, 87 )  },
+                { 9,   Color.rgb(0, 0, 0 )  },
+                { 10,   Color.rgb(22, 77, 62 )  },
+                { 11,   Color.rgb(18, 67, 32 )  },
+                { 12,   Color.rgb(60, 13, 100 )  },
+                { 13,   Color.rgb(211, 100, 73 )  },
+                { 14,   Color.rgb(206, 100, 81 )  },
+                { 15,   Color.rgb(0, 0, 100)  },
+                { 16,   Color.rgb(51, 100, 99 )  },
+                { 17,   Color.rgb(0, 0, 100 )  },
+                { 18,   Color.rgb(50, 68, 98  )  },
+                { 19,   Color.rgb(348, 92, 74 )  },
+                { 20,   Color.rgb(0, 0, 0  )  },
+                { 21,   Color.rgb(0, 0, 100 )  },
+                { 22,   Color.rgb(24, 48, 69 )  },
+                { 23,   Color.rgb(24, 60, 58 )  },
+                { 24,   Color.rgb(15, 21, 36 )  },
+                { 25,   Color.rgb(207, 100, 35 )  },
+                { 26,   Color.rgb(18, 11, 64 )  }
+
+                };
+    }
+
     private void showLoupe(boolean isActive)
     {
         DisplayMetrics metrics = new DisplayMetrics();
