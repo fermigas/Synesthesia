@@ -24,6 +24,7 @@ import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.StaticLayout;
 import android.text.TextPaint;
+import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
@@ -391,58 +392,21 @@ public class TextReco extends Activity implements SampleApplicationControl
                     .findViewById(R.id.wordList);
                 wordListLayout.removeAllViews();
                 
-                if (words.size() > 0)
-                {
-                    LayoutParams params = wordListLayout.getLayoutParams();
-                    // Changes the height and width to the specified *pixels*
-                    int maxTextHeight = params.height - (2 * WORDLIST_MARGIN);
-                    
-                    int[] textInfo = fontSizeForTextHeight(maxTextHeight,
-                        words.size(), params.width, 32, 12);
-                    
-                    int count = -1;
-                    int nbWords = textInfo[2]; // number of words we can display
-                    TextView previousView = null;
-                    TextView tv;
-                    for (WordDesc word : words)
-                    {
-                        count++;
-                        if (count == nbWords)
-                        {
-                            break;
-                        }
-                        tv = new TextView(TextReco.this);
-                        // tv.setText(word.text);
-                        RelativeLayout.LayoutParams txtParams = new RelativeLayout.LayoutParams(
-                            LayoutParams.WRAP_CONTENT,
-                            LayoutParams.WRAP_CONTENT);
-//
-                        if (previousView != null) {
-                            txtParams.addRule(RelativeLayout.RIGHT_OF,
-                                previousView.getId());
-                        }
+                if (words.size() > 0) {
+                    TextView tv = new TextView(TextReco.this);
+                    RelativeLayout.LayoutParams txtParams = new RelativeLayout.LayoutParams(
+                            LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+                    tv.setLayoutParams(txtParams);
+                    tv.setTextSize(30);
+                    tv.setHeight(1000);
 
-                        txtParams.setMargins(0, (count == 0) ? WORDLIST_MARGIN
-                            : 0, 0, (count == (nbWords - 1)) ? WORDLIST_MARGIN
-                            : 0);
-                        tv.setLayoutParams(txtParams);
-                        tv.setGravity(Gravity.CENTER_VERTICAL
-                            | Gravity.CENTER_HORIZONTAL);
-                        tv.setTextSize(textInfo[0]);
-                        // tv.setTextColor(Color.WHITE);
-                        tv.setBackgroundColor(Color.WHITE);
-                        tv.setHeight(textInfo[1]);
-
+                    for (WordDesc word : words) {
                         SpannableStringBuilder ss = convertToSynesthesia(word.text);
-
-                        // tv.setText(ss.toString());
                         tv.append(ss);
                         tv.append(" ");
-                        tv.setId(count + 100);
-                        
-                        wordListLayout.addView(tv);
-                        previousView = tv;
                     }
+
+                    wordListLayout.addView(tv);
                 }
             }
         });
@@ -454,15 +418,10 @@ public class TextReco extends Activity implements SampleApplicationControl
         SpannableStringBuilder ss = new SpannableStringBuilder(string);
 
         for(int i=0; i<string.length(); i++ ){
-            // Set Character Color
-            ss.setSpan( convertLetterToColor(string.substring(i, i+1)),
-                        i, i+1,  Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            ss.setSpan(new StyleSpan(Typeface.BOLD_ITALIC),
-                        i, i+1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ss.setSpan( convertLetterToColor(string.substring(i, i+1)), i, i+1,  Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ss.setSpan(new StyleSpan(Typeface.BOLD), i, i+1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            ss.setSpan(new BackgroundColorSpan(Color.LTGRAY),i, i+1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
-        //  tv.setText("Try Me  ");
-//                        ss.setSpan(new RelativeSizeSpan(1.5f), 0, 2, 0);
-//                        ss.setSpan(new StyleSpan(Typeface.BOLD), 0, 2, 0);
 
         return ss;
     }
@@ -473,7 +432,6 @@ public class TextReco extends Activity implements SampleApplicationControl
         int color = 0;
 
         int n = -97 + (int) letter.toLowerCase().charAt(0);
-
 
         if (n >= 0 &&n < 26 )
             color = mColorTable[n][1];
@@ -607,60 +565,7 @@ public class TextReco extends Activity implements SampleApplicationControl
         
     }
     
-    
-    // the funtions returns 3 values in an array of ints
-    // [0] : the text size
-    // [1] : the text component height
-    // [2] : the number of words we can display
-    private int[] fontSizeForTextHeight(int totalTextHeight, int nbWords,
-        int textWidth, int textSizeMax, int textSizeMin)
-    {
-        
-        int[] result = new int[3];
-        String text = "Agj";
-        TextView tv = new TextView(this);
-        tv.setText(text);
-        tv.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
-            LayoutParams.WRAP_CONTENT));
-        tv.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
-        // tv.setTextSize(30);
-        // tv.setHeight(textHeight);
-        int textSize = 0;
-        int layoutHeight = 0;
-        
-        final float densityMultiplier = getResources().getDisplayMetrics().density;
-        
-        for (textSize = textSizeMax; textSize >= textSizeMin; textSize -= 2)
-        {
-            // Get the font size setting
-            float fontScale = Settings.System.getFloat(getContentResolver(),
-                Settings.System.FONT_SCALE, 1.0f);
-            // Text view line spacing multiplier
-            float spacingMult = 1.0f * fontScale;
-            // Text view additional line spacing
-            float spacingAdd = 0.0f;
-            TextPaint paint = new TextPaint(tv.getPaint());
-            paint.setTextSize(textSize * densityMultiplier);
-            // Measure using a static layout
-            StaticLayout layout = new StaticLayout(text, paint, textWidth,
-                Alignment.ALIGN_NORMAL, spacingMult, spacingAdd, true);
-            layoutHeight = layout.getHeight();
-            if ((layoutHeight * nbWords) < totalTextHeight)
-            {
-                result[0] = textSize;
-                result[1] = layoutHeight;
-                result[2] = nbWords;
-                return result;
-            }
-        }
-        
-        // we won't be able to display all the fonts
-        result[0] = textSize;
-        result[1] = layoutHeight;
-        result[2] = totalTextHeight / layoutHeight;
-        return result;
-    }
-    
+
     
     @Override
     public void onInitARDone(SampleApplicationException exception)
