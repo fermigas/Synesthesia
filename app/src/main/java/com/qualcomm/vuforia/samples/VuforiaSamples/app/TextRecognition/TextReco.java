@@ -397,14 +397,11 @@ public class TextReco extends Activity implements SampleApplicationControl
                     RelativeLayout.LayoutParams txtParams = new RelativeLayout.LayoutParams(
                             LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
                     tv.setLayoutParams(txtParams);
-                    tv.setTextSize(30);
+                    tv.setTextSize(40);
                     tv.setHeight(1000);
 
-                    for (WordDesc word : words) {
-                        SpannableStringBuilder ss = convertToSynesthesia(word.text);
-                        tv.append(ss);
-                        tv.append(" ");
-                    }
+                    for (WordDesc word : words)
+                        tv.append(convertToSynesthesia(word.text + " "));
 
                     wordListLayout.addView(tv);
                 }
